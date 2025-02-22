@@ -24,7 +24,7 @@ Browser extension that identifies and extracts Indicators of Compromise (IoCs) f
 1. Open Firefox and navigate to `about:debugging`
 2. Click "This Firefox" in the left sidebar
 3. Click "Load Temporary Add-on"
-4. Navigate to the `ioc-scraper-2` directory and select the `manifest.json` file
+4. Navigate to the `ioc-scraper` directory and select the `manifest.json` file
 5. The extension icon should appear in your browser toolbar
 
 Note: For permanent installation in Firefox, the extension needs to be signed by Mozilla. For development, it can be loaded temporarily as described above.
