@@ -4,6 +4,10 @@ Browser extension that identifies and extracts Indicators of Compromise (IoCs) f
 - IPv4 and IPv6 addresses (normal and defanged)
 - Domain names (normal and defanged)
 - File hashes (MD5, SHA1, SHA256)
+- Email addresses (normal and defanged)
+- File paths (Windows and Unix)
+- Registry keys
+- CVE identifiers
 
 ## Installation
 
@@ -61,6 +65,23 @@ A `demo.html` file is included for testing the extension's functionality. To use
 - MD5 (32 characters)
 - SHA1 (40 characters)
 - SHA256 (64 characters)
+
+### Email Addresses
+- Normal: `user@example.com`
+- Defanged: `user[at]example[.]com`, `user(at)example(.)com`
+
+### File Paths
+- Windows: `C:\Windows\System32\cmd.exe`
+- Unix: `/etc/passwd`, `/var/www/html`
+
+### Registry Keys
+- `HKEY_LOCAL_MACHINE\Software`
+- `HKLM\SYSTEM\CurrentControlSet`
+- `HKU\Software\Microsoft`
+
+### CVEs
+- `CVE-2021-44228`
+- `CVE-2020-1234`
 
 ## Browser Compatibility
 
