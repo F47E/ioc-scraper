@@ -1,84 +1,43 @@
-// Polyfill
-const browserAPI = typeof chrome !== 'undefined' ? chrome : browser;
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "scrapeIoC") {
+    // Regular IOC patterns
+    const ipRegex = /(\b\d{1,3}\.){3}\d{1,3}\b|([a-fA-F0-9:]+:+)+[a-fA-F0-9]+/g;
+    const domainRegex = /\b((?:(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))\b/g;
+    const hashRegex = /\b[A-Fa-f0-9]{32}\b|\b[A-Fa-f0-9]{40}\b|\b[A-Fa-f0-9]{64}\b/g;
 
-const defaultPatterns = {
-    ip: /\b\d{1,3}(?:\[\.\]|\.)\d{1,3}(?:\[\.\]|\.)\d{1,3}(?:\[\.\]|\.)\d{1,3}\b/g,
-    domain: /\b(?:[a-zA-Z0-9-]+(?:\[\.\]|\.))+[a-zA-Z]{2,}\b/g,
-    hash: /\b[a-fA-F0-9]{32,64}\b/g,
-    email: /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g,
-    filePath: /(?:\/[^\s/]+)+\/?|\b[A-Z]:\\[^\\]+\\/gi,
-    registryKey: /\b(HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER|HKEY_USERS|HKEY_CLASSES_ROOT|HKEY_CURRENT_CONFIG)\\[a-zA-Z0-9\\._-]+\b/g,
-    cve: /\bCVE-\d{4}-\d{4,7}\b/g
-};
+    // Defanged IOC patterns
+    const defangedIpRegex = /\b\d{1,3}(?:\[\.\]|\(\.\)|\{\.})\d{1,3}(?:\[\.\]|\(\.\)|\{\.})\d{1,3}(?:\[\.\]|\(\.\)|\{\.})\d{1,3}\b/g;
+    const defangedDomainRegex = /\b(?:(?:[a-zA-Z0-9-]+(?:\[\.\]|\(\.\)|\{\.}|\[dot\]|(\(dot\))|\{dot\}))+[a-zA-Z]{2,})\b/g;
 
-// Load regex patterns
-function loadPatterns() {
-    const customPatterns = JSON.parse(localStorage.getItem('customPatterns')) || {};
-    return { ...defaultPatterns, ...customPatterns };
-}
+    const refangIP = (ip) => {
+      return ip.replace(/\[\.\]|\(\.\)|\{\.}/g, '.');
+    };
 
-// Refang helper
-function refang(ioc) {
-    return ioc.replace(/\[\.\]/g, '.');
-}
+    const refangDomain = (domain) => {
+      return domain.replace(/\[\.\]|\(\.\)|\{\.}|\[dot\]|\(dot\)|\{dot\}/g, '.');
+    };
 
-// IOC extraction
-function extractIOCs(selectedPatterns) {
+    const textContent = document.body.innerText;
+    
+    // Get regular IOCs
+    const ips = Array.from(textContent.matchAll(ipRegex) || []).map(m => m[0]);
+    const domains = Array.from(textContent.matchAll(domainRegex) || []).map(m => m[0]);
+    const hashes = Array.from(textContent.matchAll(hashRegex) || []).map(m => m[0]);
 
-    const text = document.body.innerText;
-    const iocs = {};
-    for (const [type, pattern] of Object.entries(selectedPatterns)) {
-        const matches = text.match(pattern);
-        if (matches) {
-            iocs[type] = [...new Set(matches)]; // Deduplicate
-        }
-    }
-    return iocs;
-}
+    // Get and refang defanged IOCs
+    const defangedIps = Array.from(textContent.matchAll(defangedIpRegex) || [])
+      .map(m => refangIP(m[0]));
+    const defangedDomains = Array.from(textContent.matchAll(defangedDomainRegex) || [])
+      .map(m => refangDomain(m[0]));
 
-// Safe highlighting
-function highlightIOCs(iocs) {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    while (walker.nextNode()) {
-        const node = walker.currentNode;
-        let content = node.textContent;
-        let modified = false;
-        
-        for (const type in iocs) {
-            iocs[type].forEach(originalIoc => {
-                const escaped = originalIoc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(escaped, 'g');
-                if (content.match(regex)) {
-                    content = content.replace(regex, `<mark>${originalIoc}</mark>`);
-                    modified = true;
-                }
-            });
-        }
-        
-        if (modified) {
-            const temp = document.createElement('div');
-            temp.innerHTML = content;
-            node.parentNode.replaceChild(temp, node);
-        }
-    }
-}
+    // Combine and deduplicate results
+    const uniqueIps = [...new Set([...ips, ...defangedIps])];
+    const uniqueDomains = [...new Set([...domains, ...defangedDomains])];
 
-// Message handling
-browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'extract') {
-        const text = document.body.textContent;
-        const patterns = loadPatterns();
-        const selectedPatterns = {};
-        
-        request.types.forEach(type => {
-            if (patterns[type]) {
-                selectedPatterns[type] = patterns[type];
-            }
-        });
-        
-        const iocs = extractIOCs(text, selectedPatterns);
-        highlightIOCs(iocs);
-        sendResponse(iocs);
-        return true; // Required for async response
-    }
+    sendResponse({ 
+      ips: uniqueIps, 
+      domains: uniqueDomains, 
+      hashes 
+    });
+  }
 });
