@@ -1,29 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IOC Scraper</title>
+  <title>IoC Scraper</title>
   <style>
-    body { font-family: Helvetica, sans-serif; padding: 10px; width: 300px; }
-    button { margin: 5px; padding: 5px 10px; }
-    label { display: block; margin: 2px 0; }
-    textarea { width: 100%; height: 150px; margin-top: 10px; }
+    body { font-family: Arial, sans-serif; }
+    .ioc-list { margin: 0; padding: 0; list-style: none; }
+    .ioc-list li { margin: 5px 0; }
   </style>
 </head>
 <body>
-  <h3>Extracted IOCs</h3>
-  <div>
-    <label><input type="checkbox" id="ip" checked> IP Addresses</label>
-    <label><input type="checkbox" id="domain" checked> Domains</label>
-    <label><input type="checkbox" id="hash" checked> Hashes</label>
-    <label><input type="checkbox" id="email" checked> Emails</label>
-    <label><input type="checkbox" id="filePath" checked> File Paths</label>
-    <label><input type="checkbox" id="registryKey" checked> Registry Keys</label>
-    <label><input type="checkbox" id="cve" checked> CVEs</label>
-  </div>
-  <button id="extract">Extract IOCs</button>
-  <button id="exportCSV">Export as CSV</button>
-  <button id="exportJSON">Export as JSON</button>
-  <textarea id="iocDisplay" readonly></textarea>
+  <h1>Indicators of Compromise</h1>
+  <h2>IPs</h2>
+  <ul id="ips" class="ioc-list"></ul>
+  <h2>Domains</h2>
+  <ul id="domains" class="ioc-list"></ul>
+  <h2>File Hashes</h2>
+  <ul id="hashes" class="ioc-list"></ul>
   <script src="popup.js"></script>
 </body>
 </html>
