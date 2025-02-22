@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IoC Scraper Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>IoC Test Cases</h1>
+
+    <div class="test-section">
+        <h2>IPv4 Addresses</h2>
+        <p>Normal: 192.168.1.1, 10.0.0.1, 172.16.254.1</p>
+        <p>Defanged: 192[.]168[.]2[.]2, 10(.)0(.)0(.)2, 172{.}16{.}254{.}2</p>
+    </div>
+
+    <div class="test-section">
+        <h2>IPv6 Addresses</h2>
+        <p>Normal: 2001:0db8:85a3:0000:0000:8a2e:0370:7334</p>
+        <p>Short form: 2001:db8:85a3::8a2e:370:7335</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Domains</h2>
+        <p>Normal: evil.example.com, malware.test.com, phishing.domain.org</p>
+        <p>Defanged: evil[.]example[.]com, malware(.)test(.)com, phishing[dot]domain[dot]org</p>
+    </div>
+
+    <div class="test-section">
+        <h2>File Hashes</h2>
+        <p>MD5: d41d8cd98f00b204e9800998ecf8427e</p>
+        <p>SHA1: da39a3ee5e6b4b0d3255bfef95601890afd80709</p>
+        <p>SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Mixed Context Example</h2>
+        <p>The malicious actor at bad[.]actor[.]com (IP: 192[.]168[.]100[.]50) distributed malware with hash e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 through their C2 server at evil(.)example(.)com</p>
+    </div>
+</body>
+</html>
